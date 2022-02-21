@@ -17,15 +17,15 @@ enum Workflow {
 
 fn main() -> Result<()> {
     match Workflow::parse() {
-        Workflow::Build(arg) => {
+        Workflow::Build(build) => {
             let app = app();
 
             for page in ["index", "page_1", "page_2"] {
                 generate_page(&app, page)?;
             }
 
-            let release = arg.release;
-            let dist_result = arg
+            let release = build.release;
+            let dist_result = build
                 .static_dir_path(STATIC_PATH)
                 .app_name("app")
                 .run("app")?;
