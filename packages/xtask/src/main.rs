@@ -6,6 +6,7 @@ use xshell::write_file;
 use xtask_wasm::{
     anyhow::Result,
     clap::{self, StructOpt},
+    default_dist_dir, WasmOpt,
 };
 
 #[derive(clap::Parser)]
@@ -30,14 +31,11 @@ fn main() -> Result<()> {
                 .run("app")?;
 
             if release {
-                xtask_wasm::WasmOpt::level(1)
-                    .shrink(2)
-                    .optimize(dist_result.wasm)?;
+                WasmOpt::level(1).shrink(2).optimize(dist_result.wasm)?;
             }
         }
-        Workflow::Serve(arg) => {
-            arg.arg("build")
-                .start(xtask_wasm::default_dist_dir(false))?;
+        Workflow::Serve(server) => {
+            server.arg("build").start(default_dist_dir(false))?;
         }
     }
 
