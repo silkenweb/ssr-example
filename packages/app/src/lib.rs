@@ -20,8 +20,9 @@ pub fn app() -> Div {
                 .on_click(|_, _| router::set_url_path("/page_2.html"))
                 .text("Go to page 2"),
         )
-        .child(p().text_signal(
-            router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
-        ))
+        // TODO: Enable this when server side routing is implemented
+        // .child(p().text_signal(
+        //     router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
+        // ))
         .build()
 }
