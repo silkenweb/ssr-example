@@ -5,13 +5,13 @@ use xtask_wasm::{
 
 #[derive(clap::Parser)]
 enum Workflow {
-    Dist(xtask_wasm::Dist),
-    Start(xtask_wasm::DevServer),
+    Build(xtask_wasm::Dist),
+    Serve(xtask_wasm::DevServer),
 }
 
 fn main() -> Result<()> {
     match Workflow::parse() {
-        Workflow::Dist(arg) => {
+        Workflow::Build(arg) => {
             // TODO: Implement server side routing
             // TODO: Generate pages
             let release = arg.release;
@@ -26,9 +26,9 @@ fn main() -> Result<()> {
                     .optimize(dist_result.wasm)?;
             }
         }
-        Workflow::Start(arg) => {
+        Workflow::Serve(arg) => {
             println!("Listening on http://{}:{}", arg.ip, arg.port);
-            arg.arg("dist").start(xtask_wasm::default_dist_dir(false))?;
+            arg.arg("build").start(xtask_wasm::default_dist_dir(false))?;
         }
     }
 
