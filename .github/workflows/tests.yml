@@ -13,6 +13,11 @@ jobs:
       with:
         profile: minimal
         toolchain: ${{ matrix.rust }}
+        target: wasm32-unknown-unknown
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
         default: true
         components: clippy
     - uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
