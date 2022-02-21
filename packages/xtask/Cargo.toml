@@ -9,3 +9,6 @@ publish = false
 xtask-wasm = { version = "0.1.1", features = ["wasm-opt"] }
 app = { path = "../app" }
 xshell = "0.1.17"
+silkenweb = { git = "https://github.com/silkenweb/silkenweb", features = [
+    "server-side-render",
+] }

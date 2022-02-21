@@ -1,11 +1,11 @@
-//! A minimal routing example
 use silkenweb::{
     elements::{
         html::{button, div, p, Div},
         ElementEvents,
     },
+    macros::ElementBuilder,
     prelude::ParentBuilder,
-    router, macros::ElementBuilder,
+    router::{self, Url},
 };
 
 pub fn app() -> Div {
@@ -20,9 +20,14 @@ pub fn app() -> Div {
                 .on_click(|_, _| router::set_url_path("/page_2.html"))
                 .text("Go to page 2"),
         )
-        // TODO: Enable this when server side routing is implemented
-        // .child(p().text_signal(
-        //     router::url().signal_ref(|url| format!("URL Path is: {}", url.pathname())),
-        // ))
+        .child(p().text_signal(router::url().signal_ref(|url| {
+            format!(
+                "URL Path is: {}",
+                match url.pathname().as_str() {
+                    "/" => "/index.html",
+                    path => path,
+                }
+            )
+        })))
         .build()
 }

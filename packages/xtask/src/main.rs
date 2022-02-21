@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use app::app;
+use silkenweb::{elements::html::Div, router, task};
 use xshell::write_file;
 use xtask_wasm::{
     anyhow::Result,
@@ -16,8 +17,10 @@ enum Workflow {
 fn main() -> Result<()> {
     match Workflow::parse() {
         Workflow::Build(arg) => {
+            let app = app();
+
             for page in ["index", "page_1", "page_2"] {
-                generate_page(page)?;
+                generate_page(&app, page)?;
             }
 
             let release = arg.release;
@@ -41,8 +44,11 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn generate_page(page: &str) -> xshell::Result<()> {
-    let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app());
+fn generate_page(app: &Div, page: &str) -> xshell::Result<()> {
+    router::set_url_path(&format!("/{}.html", page));
+    task::server::render_now_sync();
+
+    let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
     let page_path = Path::new(STATIC_PATH).join(page).with_extension("html");
 
     write_file(page_path, page_html)
