@@ -18,20 +18,17 @@ enum Workflow {
 fn main() -> Result<()> {
     match Workflow::parse() {
         Workflow::Build(build) => {
+            let release = build.release;
+            let artifacts = build.app_name("app").run("app")?;
+
+            if release {
+                WasmOpt::level(1).shrink(2).optimize(artifacts.wasm)?;
+            }
+
             let app = app();
 
             for page in ["index", "page_1", "page_2"] {
-                generate_page(&app, page)?;
-            }
-
-            let release = build.release;
-            let dist_result = build
-                .static_dir_path(STATIC_PATH)
-                .app_name("app")
-                .run("app")?;
-
-            if release {
-                WasmOpt::level(1).shrink(2).optimize(dist_result.wasm)?;
+                generate_page(&artifacts.dist_dir, &app, page)?;
             }
         }
         Workflow::Serve(server) => {
@@ -42,14 +39,12 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn generate_page(app: &Div, page: &str) -> xshell::Result<()> {
+fn generate_page(dist_dir: &Path, app: &Div, page: &str) -> xshell::Result<()> {
     router::set_url_path(&format!("/{}.html", page));
     task::server::render_now_sync();
 
     let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
-    let page_path = Path::new(STATIC_PATH).join(page).with_extension("html");
+    let page_path = Path::new(dist_dir).join(page).with_extension("html");
 
     write_file(page_path, page_html)
 }
-
-const STATIC_PATH: &str = "packages/app/static";
