@@ -12,3 +12,5 @@ xshell = "0.1.17"
 silkenweb = { git = "https://github.com/silkenweb/silkenweb", features = [
     "server-side-render",
 ] }
+env_logger = "0.9.0"
+log = "0.4.14"

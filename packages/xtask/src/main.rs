@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use app::app;
+use log::LevelFilter;
 use silkenweb::{elements::html::Div, router, task};
 use xshell::write_file;
 use xtask_wasm::{
@@ -16,6 +17,8 @@ enum Workflow {
 }
 
 fn main() -> Result<()> {
+    env_logger::builder().filter_level(LevelFilter::Info).init();
+
     match Workflow::parse() {
         Workflow::Build(build) => {
             let release = build.release;
