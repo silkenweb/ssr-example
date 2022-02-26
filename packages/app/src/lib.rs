@@ -5,7 +5,7 @@ use silkenweb::{
     },
     macros::ElementBuilder,
     prelude::ParentBuilder,
-    router::{self, Url},
+    router,
 };
 
 pub fn app() -> Div {
@@ -20,11 +20,11 @@ pub fn app() -> Div {
                 .on_click(|_, _| router::set_url_path("/page_2.html"))
                 .text("Go to page 2"),
         )
-        .child(p().text_signal(router::url().signal_ref(|url| {
+        .child(p().text_signal(router::url_path().signal_ref(|url_path| {
             format!(
                 "URL Path is: {}",
-                match url.pathname().as_str() {
-                    "/" => "/index.html",
+                match url_path.as_str() {
+                    "" => "index.html",
                     path => path,
                 }
             )
