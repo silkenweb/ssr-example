@@ -2,7 +2,7 @@ use std::path::Path;
 
 use app::app;
 use log::LevelFilter;
-use silkenweb::{elements::html::Div, router, task};
+use silkenweb::{router, task};
 use xshell::write_file;
 use xtask_wasm::{
     anyhow::Result,
@@ -28,11 +28,7 @@ fn main() -> Result<()> {
                 WasmOpt::level(1).shrink(2).optimize(artifacts.wasm)?;
             }
 
-            let app = app();
-
-            for page in ["index", "page_1", "page_2"] {
-                generate_page(&artifacts.dist_dir, &app, page)?;
-            }
+            generate_pages(&artifacts.dist_dir)?;
         }
         Workflow::Serve(server) => {
             server.arg("build").start(default_dist_dir(false))?;
@@ -42,12 +38,18 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn generate_page(dist_dir: &Path, app: &Div, page: &str) -> xshell::Result<()> {
-    router::set_url_path(&format!("/{}.html", page));
-    task::server::render_now_sync();
+fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
+    let app = app();
 
-    let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
-    let page_path = Path::new(dist_dir).join(page).with_extension("html");
+    for page in ["index", "page_1", "page_2"] {
+        router::set_url_path(&format!("/{}.html", page));
+        task::server::render_now_sync();
 
-    write_file(page_path, page_html)
+        let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
+        let page_path = Path::new(dist_dir).join(page).with_extension("html");
+
+        write_file(page_path, page_html)?;
+    }
+
+    Ok(())
 }
