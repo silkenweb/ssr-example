@@ -42,7 +42,7 @@ fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
     let app = app();
 
     for page in ["index", "page_1", "page_2"] {
-        router::set_url_path(&format!("/{}.html", page));
+        router::set_url_path(&format!("{page}.html"));
         task::server::render_now_sync();
 
         let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
