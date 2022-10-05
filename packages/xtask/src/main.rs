@@ -3,7 +3,7 @@ use std::path::Path;
 use app::app;
 use log::LevelFilter;
 use silkenweb::{router, task};
-use xshell::write_file;
+use xshell::Shell;
 use xtask_wasm::{
     anyhow::Result,
     clap::{self, StructOpt},
@@ -40,15 +40,16 @@ fn main() -> Result<()> {
 
 fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
     let app = app();
+    let sh = Shell::new()?;
 
     for page in ["index", "page_1", "page_2"] {
-        router::set_url_path(&format!("{page}.html"));
+        router::set_url_path(format!("{page}.html").as_str());
         task::server::render_now_sync();
 
         let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
         let page_path = Path::new(dist_dir).join(page).with_extension("html");
 
-        write_file(page_path, page_html)?;
+        sh.write_file(page_path, page_html)?;
     }
 
     Ok(())

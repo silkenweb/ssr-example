@@ -6,10 +6,10 @@ edition = "2021"
 publish = false
 
 [dependencies]
-xtask-wasm = { version = "0.1.1", features = ["wasm-opt"] }
+xtask-wasm = { version = "0.1.8", features = ["wasm-opt"] }
 app = { path = "../app" }
-xshell = "0.1.17"
-silkenweb = { git = "https://github.com/silkenweb/silkenweb", features = [
+xshell = "0.2.2"
+silkenweb = { version = "0.3.0", features = [
     "server-side-render",
 ] }
 env_logger = "0.9.0"
