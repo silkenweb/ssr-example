@@ -1,5 +1,5 @@
 [package]
-name = "app"
+name = "ssr-example-app"
 version = "0.1.0"
 authors = ["Simon Bourne <simonbourne@gmail.com>"]
 edition = "2021"

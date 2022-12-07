@@ -3,10 +3,21 @@ use silkenweb::{
         html::{button, div, p, Div},
         ElementEvents,
     },
+    hydration::hydrate,
     node::element::ElementBuilder,
     prelude::ParentBuilder,
     router,
+    task::spawn_local,
 };
+
+pub fn hydrate_app() {
+    let app = app();
+
+    spawn_local(async {
+        let stats = hydrate("app", app).await;
+        web_log::println!("{}", stats);
+    });
+}
 
 pub fn app() -> Div {
     div()

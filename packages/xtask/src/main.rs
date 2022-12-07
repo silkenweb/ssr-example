@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use app::app;
 use log::LevelFilter;
 use silkenweb::{router, task};
+use ssr_example_app::app;
 use xshell::Shell;
 use xtask_wasm::{
     anyhow::Result,
@@ -22,7 +22,9 @@ fn main() -> Result<()> {
     match Workflow::parse() {
         Workflow::Build(build) => {
             let release = build.release;
-            let artifacts = build.app_name("app").run("app")?;
+            let artifacts = build
+                .app_name("ssr_example_pre_rendered_client")
+                .run("ssr_example_pre_rendered_client")?;
 
             if release {
                 WasmOpt::level(1).shrink(2).optimize(artifacts.wasm)?;
@@ -46,7 +48,14 @@ fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
         router::set_url_path(format!("{page}.html").as_str());
         task::server::render_now_sync();
 
-        let page_html = format!(include_str!("../../app/page.tmpl.html"), app_html = app);
+        let page_html = format!(
+            include_str!("../../app/page.tmpl.html"),
+            init_script = r#"
+                import init from "/ssr_example_pre_rendered_client.js";
+                init(new URL('ssr_example_pre_rendered_client.wasm', import.meta.url));
+            "#,
+            app_html = app
+        );
         let page_path = Path::new(dist_dir).join(page).with_extension("html");
 
         sh.write_file(page_path, page_html)?;
