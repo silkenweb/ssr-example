@@ -1,12 +1,12 @@
 use std::path::Path;
 
 use log::LevelFilter;
-use silkenweb::{router, task};
+use silkenweb::{dom::Dry, prelude::html::Div, router, task};
 use ssr_example_app::app;
 use xshell::Shell;
 use xtask_wasm::{
     anyhow::Result,
-    clap::{self, StructOpt},
+    clap::{self, Parser},
     default_dist_dir, WasmOpt,
 };
 
@@ -41,7 +41,8 @@ fn main() -> Result<()> {
 }
 
 fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
-    let app = app();
+    let app: Div<Dry> = app();
+    let app = app.freeze();
     let sh = Shell::new()?;
 
     for page in ["index", "page_1", "page_2"] {

@@ -6,9 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { version = "0.3.0", features = [
-    "server-side-render",
-    "hydration",
-] }
+silkenweb = { git = "https://github.com/silkenweb/silkenweb" }
 futures-signals = "0.3.31"
 web-log = "1.0.1"
