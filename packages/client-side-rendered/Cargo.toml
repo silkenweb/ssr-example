@@ -6,6 +6,6 @@ edition = "2021"
 publish = false
 
 [dependencies]
-silkenweb = { git = "https://github.com/silkenweb/silkenweb" }
+silkenweb = "0.4.0"
 ssr-example-app = { path = "../app" }
 wasm-bindgen = "0.2.83"
