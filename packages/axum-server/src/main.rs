@@ -6,7 +6,7 @@ use axum::{
     response::{IntoResponse, Response},
     Router, Server,
 };
-use silkenweb::{dom::Dry, prelude::html::Div, router, task};
+use silkenweb::{dom::Dry, router, task};
 use ssr_example_app::app;
 use tower_http::services::ServeDir;
 
@@ -27,7 +27,7 @@ async fn io_error_to_response(err: io::Error) -> impl IntoResponse {
 }
 
 async fn handler(uri: Uri) -> impl IntoResponse {
-    let app: Div<Dry> = app();
+    let (title, body) = app::<Dry>();
     router::set_url_path(uri.path());
     // I think this is OK, as we only run futures until they're stalled. Axum only
     // supports `Send` handers, so we can't use `task::render_now().await;`. We're
@@ -37,7 +37,8 @@ async fn handler(uri: Uri) -> impl IntoResponse {
 
     let page_html = format!(
         include_str!("../../app/page.tmpl.html"),
-        app_html = app.freeze(),
+        title_html = title.freeze(),
+        body_html = body.freeze(),
         init_script = r#"
                 import init, {js_main} from '/pkg/ssr_example_axum_client.js';
                 init().then(js_main);

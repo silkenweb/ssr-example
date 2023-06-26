@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use log::LevelFilter;
-use silkenweb::{dom::Dry, prelude::html::Div, router, task};
+use silkenweb::{dom::Dry, router, task};
 use ssr_example_app::app;
 use xshell::Shell;
 use xtask_wasm::{
@@ -41,8 +41,9 @@ fn main() -> Result<()> {
 }
 
 fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
-    let app: Div<Dry> = app();
-    let app = app.freeze();
+    let (title, body) = app::<Dry>();
+    let title = title.freeze();
+    let body = body.freeze();
     let sh = Shell::new()?;
 
     for page in ["index", "page_1", "page_2"] {
@@ -55,7 +56,8 @@ fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
                 import init from "/ssr_example_pre_rendered_client.js";
                 init(new URL('ssr_example_pre_rendered_client.wasm', import.meta.url));
             "#,
-            app_html = app
+            title_html = title,
+            body_html = body
         );
         let page_path = Path::new(dist_dir).join(page).with_extension("html");
 
