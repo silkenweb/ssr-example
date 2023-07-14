@@ -9,6 +9,7 @@ publish = false
 ssr-example-app = { path = "../app" }
 axum = { version = "0.6.1", features = ["headers"] }
 tokio = { version = "1.21.2", features = ["full"] }
-silkenweb = "0.4.0"
+tokio-util = { version = "0.7.8", features = ["rt"] }
+silkenweb = { git = "https://github.com/silkenweb/silkenweb" }
 web-log = "1.0.1"
 tower-http = { version = "0.3.4", features = ["fs"] }

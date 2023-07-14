@@ -4,18 +4,21 @@ use axum::{
     error_handling::HandleError,
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},
-    Router, Server,
+    Extension, Router, Server,
 };
 use silkenweb::{dom::Dry, router, task};
 use ssr_example_app::app;
+use tokio_util::task::LocalPoolHandle;
 use tower_http::services::ServeDir;
 
 #[tokio::main]
 async fn main() {
+    let local_pool = LocalPoolHandle::new(16);
     let pkg_service = HandleError::new(ServeDir::new("../axum-client/pkg"), io_error_to_response);
     let app = Router::new()
         .nest_service("/pkg", pkg_service)
-        .fallback(handler);
+        .fallback(handler)
+        .layer(Extension(local_pool));
     Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())
         .await
@@ -26,14 +29,20 @@ async fn io_error_to_response(err: io::Error) -> impl IntoResponse {
     (StatusCode::NOT_FOUND, err.to_string())
 }
 
-async fn handler(uri: Uri) -> impl IntoResponse {
+async fn handler(Extension(local_pool): Extension<LocalPoolHandle>, uri: Uri) -> impl IntoResponse {
+    // Axum requires futures to be `Send` so it can be moved between threads. Each
+    // Silkenweb page is single threaded, so we spawn another task pinned to a
+    // thread using `LocalPoolHandle`.
+    local_pool
+        .spawn_pinned(|| task::server::scope(render(uri)))
+        .await
+        .unwrap()
+}
+
+async fn render(uri: Uri) -> impl IntoResponse {
     let (title, body) = app::<Dry>();
     router::set_url_path(uri.path());
-    // I think this is OK, as we only run futures until they're stalled. Axum only
-    // supports `Send` handers, so we can't use `task::render_now().await;`. We're
-    // relying on `app()` and this to be running on the same thread, which is also
-    // OK as there are no `await`s between them.
-    task::server::render_now_sync();
+    task::render_now().await;
 
     let page_html = format!(
         include_str!("../../app/page.tmpl.html"),

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use log::LevelFilter;
-use silkenweb::{dom::Dry, router, task};
+use silkenweb::{dom::Dry, router, task::{self, server}};
 use ssr_example_app::app;
 use xshell::Shell;
 use xtask_wasm::{
@@ -41,28 +41,30 @@ fn main() -> Result<()> {
 }
 
 fn generate_pages(dist_dir: &Path) -> xshell::Result<()> {
-    let (title, body) = app::<Dry>();
-    let title = title.freeze();
-    let body = body.freeze();
-    let sh = Shell::new()?;
+    server::sync_scope(|| {
+        let (title, body) = app::<Dry>();
+        let title = title.freeze();
+        let body = body.freeze();
+        let sh = Shell::new()?;
 
-    for page in ["index", "page_1", "page_2"] {
-        router::set_url_path(format!("{page}.html").as_str());
-        task::server::render_now_sync();
+        for page in ["index", "page_1", "page_2"] {
+            router::set_url_path(format!("{page}.html").as_str());
+            task::server::render_now_sync();
 
-        let page_html = format!(
-            include_str!("../../app/page.tmpl.html"),
-            init_script = r#"
+            let page_html = format!(
+                include_str!("../../app/page.tmpl.html"),
+                init_script = r#"
                 import init from "/ssr_example_pre_rendered_client.js";
                 init(new URL('ssr_example_pre_rendered_client.wasm', import.meta.url));
             "#,
-            title_html = title,
-            body_html = body
-        );
-        let page_path = Path::new(dist_dir).join(page).with_extension("html");
+                title_html = title,
+                body_html = body
+            );
+            let page_path = Path::new(dist_dir).join(page).with_extension("html");
 
-        sh.write_file(page_path, page_html)?;
-    }
+            sh.write_file(page_path, page_html)?;
+        }
 
-    Ok(())
+        Ok(())
+    })
 }
