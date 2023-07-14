@@ -30,9 +30,9 @@ async fn io_error_to_response(err: io::Error) -> impl IntoResponse {
 }
 
 async fn handler(Extension(local_pool): Extension<LocalPoolHandle>, uri: Uri) -> impl IntoResponse {
-    // Axum requires futures to be `Send` so it can be moved between threads. Each
-    // Silkenweb page is single threaded, so we spawn another task pinned to a
-    // thread using `LocalPoolHandle`.
+    // Axum requires futures to be `Send` so they can be moved between threads.
+    // Silkenweb is single threaded, so we spawn a task pinned to a thread using
+    // `LocalPoolHandle`.
     local_pool
         .spawn_pinned(|| task::server::scope(render(uri)))
         .await
@@ -49,8 +49,8 @@ async fn render(uri: Uri) -> impl IntoResponse {
         title_html = title.freeze(),
         body_html = body.freeze(),
         init_script = r#"
-                import init, {js_main} from '/pkg/ssr_example_axum_client.js';
-                init().then(js_main);
+            import init, {js_main} from '/pkg/ssr_example_axum_client.js';
+            init().then(js_main);
         "#
     );
 
