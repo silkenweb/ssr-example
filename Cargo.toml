@@ -6,3 +6,9 @@ members = ["packages/*"]
 codegen-units = 1
 lto = true
 opt-level = "z"
+
+[workspace.dependencies]
+silkenweb = { git = "https://github.com/silkenweb/silkenweb" }
+ssr-example-app = { path = "packages/app" }
+wasm-bindgen = "0.2.84"
+web-log = "1.0.1"
